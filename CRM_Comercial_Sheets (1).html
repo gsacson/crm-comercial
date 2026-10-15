@@ -135,6 +135,48 @@ code{background:var(--surface);border:1px solid var(--line);border-radius:4px;pa
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+/* AGENDA */
+.ag-day-block{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.ag-day-header{padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.ag-day-label{font-size:13px;font-weight:700;color:var(--ink)}
+.ag-day-label.hoy{color:var(--accent)}
+.ag-day-sub{font-size:11px;color:var(--ink3)}
+.ag-day-count{background:var(--light);color:var(--mid);border-radius:99px;padding:2px 9px;font-size:11px;font-weight:600}
+.ag-day-count.urgente{background:#fde6e6;color:var(--red)}
+.ag-item{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s}
+.ag-item:last-child{border-bottom:none}
+.ag-item:hover{background:#f5f7ff}
+.ag-item-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px}
+.ag-item-body{flex:1}
+.ag-item-cli{font-size:13px;font-weight:600;margin-bottom:3px}
+.ag-item-meta{font-size:11px;color:var(--ink3);display:flex;gap:10px;flex-wrap:wrap}
+.ag-item-obs{font-size:11px;color:var(--ink2);margin-top:4px;font-style:italic}
+.ag-item-vend{font-size:11px;color:var(--ink3);font-weight:500;white-space:nowrap}
+.ag-empty{padding:28px;text-align:center;color:var(--ink3);font-size:13px}
+.ag-mes-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.ag-mes-header{text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);padding:6px 0}
+.ag-mes-cell{min-height:80px;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:6px;cursor:pointer;transition:border-color .12s}
+.ag-mes-cell:hover{border-color:var(--accent)}
+.ag-mes-cell.hoy{border-color:var(--accent);background:var(--light)}
+.ag-mes-cell.otro-mes{background:var(--surface);opacity:.5}
+.ag-mes-num{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.ag-mes-num.hoy{color:var(--accent)}
+.ag-mes-dot{font-size:10px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;padding:1px 4px;border-radius:3px;background:var(--light)}
+.ag-mes-dot.urgente{background:#fde6e6;color:var(--red)}
+.ag-vencido-bar{background:#fde6e6;border:1px solid #f0b8b8;border-radius:var(--radius);padding:12px 18px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.ag-vencido-icon{font-size:18px}
+.ag-vencido-txt{flex:1;font-size:13px;color:var(--red)}
+.ag-semana-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.ag-semana-col{background:var(--white);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden}
+.ag-semana-col.hoy{border-color:var(--accent)}
+.ag-semana-col-header{padding:10px;text-align:center;border-bottom:1px solid var(--line)}
+.ag-semana-col-label{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase}
+.ag-semana-col-num{font-size:20px;font-weight:700;color:var(--ink)}
+.ag-semana-col-num.hoy{color:var(--accent)}
+.ag-semana-item{padding:7px 10px;border-bottom:1px solid var(--line);font-size:11px;cursor:pointer}
+.ag-semana-item:hover{background:var(--light)}
+.ag-semana-item:last-child{border-bottom:none}
+.ag-semana-empty{padding:16px;text-align:center;color:var(--ink3);font-size:11px}
 </style>
 </head>
 <body>
@@ -216,6 +258,7 @@ code{background:var(--surface);border:1px solid var(--line);border-radius:4px;pa
       <div class="nav-section-label">Datos</div>
       <button class="nav-item" onclick="nav('historial',this)"><span class="nav-icon">&#9776;</span> Historial</button>
       <button class="nav-item" onclick="nav('clientes',this)"><span class="nav-icon">&#9675;</span> Clientes</button>
+      <button class="nav-item" onclick="nav('agenda',this)"><span class="nav-icon">&#128197;</span> Agenda</button>
       <div class="nav-section-label">Config</div>
       <button class="nav-item" onclick="nav('config',this)"><span class="nav-icon">&#9965;</span> Configuración</button>
     </nav>
@@ -353,6 +396,44 @@ code{background:var(--surface);border:1px solid var(--line);border-radius:4px;pa
           <button class="btn btn-primary btn-sm" style="align-self:flex-end" onclick="openAddClient()">+ Agregar cliente</button>
         </div>
         <div id="cli-grid" class="client-grid"></div>
+      </div>
+
+      <!-- AGENDA -->
+      <div id="page-agenda" class="page">
+        <!-- Filtros de vista -->
+        <div class="filter-bar" style="margin-bottom:18px">
+          <div class="form-group">
+            <label>Vista</label>
+            <select id="ag-vista" onchange="renderAgenda()">
+              <option value="dia">Día</option>
+              <option value="semana" selected>Semana</option>
+              <option value="mes">Mes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Comercial</label>
+            <select id="ag-vend" onchange="renderAgenda()"><option value="">Todos</option></select>
+          </div>
+          <div class="form-group">
+            <label>Fecha referencia</label>
+            <input type="date" id="ag-fecha" onchange="renderAgenda()">
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="agHoy()" style="align-self:flex-end">Hoy</button>
+          <button class="btn btn-outline btn-sm" onclick="agMover(-1)" style="align-self:flex-end">&#8592; Anterior</button>
+          <button class="btn btn-outline btn-sm" onclick="agMover(1)" style="align-self:flex-end">Siguiente &#8594;</button>
+        </div>
+
+        <!-- Título de período -->
+        <div id="ag-periodo" style="font-size:15px;font-weight:600;color:var(--ink);margin-bottom:16px"></div>
+
+        <!-- KPIs de agenda -->
+        <div class="kpi-grid" id="ag-kpis" style="margin-bottom:20px"></div>
+
+        <!-- Alertas vencidas -->
+        <div id="ag-vencidos" style="margin-bottom:16px"></div>
+
+        <!-- Contenido principal de la agenda -->
+        <div id="ag-contenido"></div>
       </div>
 
       <!-- CONFIG -->
@@ -572,7 +653,7 @@ function setSyncStatus(status, label) {
 /* ══════════════════════════════════════════════════════
    NAVIGATION
 ══════════════════════════════════════════════════════ */
-const PAGE_TITLES = { dashboard:'Dashboard', nueva:'Nueva actividad', historial:'Historial', clientes:'Clientes', config:'Configuración' };
+const PAGE_TITLES = { dashboard:'Dashboard', nueva:'Nueva actividad', historial:'Historial', clientes:'Clientes', agenda:'Agenda de seguimientos', config:'Configuración' };
 
 function nav(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -584,6 +665,7 @@ function nav(id, btn) {
   if (id === 'dashboard')  renderDashboard();
   if (id === 'historial')  renderHistorial();
   if (id === 'clientes')   renderClientes();
+  if (id === 'agenda')     { document.getElementById('ag-fecha').value = document.getElementById('ag-fecha').value || today(); renderAgenda(); }
   if (id === 'config')     renderConfig();
 }
 
@@ -594,6 +676,7 @@ function renderCurrentPage() {
   if (id === 'dashboard')  renderDashboard();
   if (id === 'historial')  renderHistorial();
   if (id === 'clientes')   renderClientes();
+  if (id === 'agenda')     renderAgenda();
   if (id === 'config')     renderConfig();
 }
 
@@ -937,6 +1020,163 @@ function exportCSV() {
   el.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   el.download = `CRM_Actividades_${today()}.csv`;
   el.click();
+}
+
+/* ══════════════════════════════════════════════════════
+   AGENDA
+══════════════════════════════════════════════════════ */
+function agHoy() {
+  document.getElementById('ag-fecha').value = today();
+  renderAgenda();
+}
+function agMover(dir) {
+  const vista = document.getElementById('ag-vista').value;
+  const ref   = document.getElementById('ag-fecha').value || today();
+  const d     = new Date(ref + 'T12:00:00');
+  if (vista==='dia')    d.setDate(d.getDate()+dir);
+  if (vista==='semana') d.setDate(d.getDate()+dir*7);
+  if (vista==='mes')    d.setMonth(d.getMonth()+dir);
+  document.getElementById('ag-fecha').value = d.toISOString().slice(0,10);
+  renderAgenda();
+}
+function renderAgenda() {
+  const vista = document.getElementById('ag-vista').value;
+  const ref   = document.getElementById('ag-fecha').value || today();
+  const vend  = document.getElementById('ag-vend').value;
+  const agVendEl = document.getElementById('ag-vend');
+  if (agVendEl.options.length <= 1 && STATE.vends.length) {
+    STATE.vends.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; agVendEl.appendChild(o); });
+  }
+  const cerrados = ['Cerrado - Ganado','Cerrado - Perdido'];
+  const actsConProx = STATE.acts.filter(a => a.prox && a.prox.length >= 8);
+  const actsVend = vend ? actsConProx.filter(a=>a.vend===vend) : actsConProx;
+  const todayStr = today();
+  const vencidos = actsVend.filter(a => a.prox < todayStr && !cerrados.includes(a.res));
+  renderAgendaKPIs(actsVend, vencidos, todayStr);
+  const vencDiv = document.getElementById('ag-vencidos');
+  if (vencidos.length) {
+    vencDiv.innerHTML = `<div class="ag-vencido-bar"><span class="ag-vencido-icon">⚠️</span><span class="ag-vencido-txt"><b>${vencidos.length} seguimiento${vencidos.length>1?'s':''} vencido${vencidos.length>1?'s':''}</b> — ${vencidos.slice(0,3).map(a=>`<b>${a.cliente}</b>`).join(', ')}${vencidos.length>3?` y ${vencidos.length-3} más`:''}.</span></div>`;
+  } else { vencDiv.innerHTML = ''; }
+  if (vista==='dia')    renderAgendaDia(actsVend, ref, todayStr);
+  if (vista==='semana') renderAgendaSemana(actsVend, ref, todayStr);
+  if (vista==='mes')    renderAgendaMes(actsVend, ref, todayStr);
+}
+function renderAgendaKPIs(acts, vencidos, todayStr) {
+  const manana = new Date(todayStr+'T12:00:00'); manana.setDate(manana.getDate()+1);
+  const mananaStr = manana.toISOString().slice(0,10);
+  const fin7 = new Date(todayStr+'T12:00:00'); fin7.setDate(fin7.getDate()+7);
+  const fin7Str = fin7.toISOString().slice(0,10);
+  const hoy7    = acts.filter(a=>a.prox===todayStr).length;
+  const manana7 = acts.filter(a=>a.prox===mananaStr).length;
+  const semana  = acts.filter(a=>a.prox>=todayStr&&a.prox<=fin7Str).length;
+  document.getElementById('ag-kpis').innerHTML = [
+    {lbl:'Hoy',             val:hoy7,            color:hoy7>0?'#8b1a1a':'#1a3a6b'},
+    {lbl:'Mañana',          val:manana7,          color:'#7a5c00'},
+    {lbl:'Próximos 7 días', val:semana,           color:'#1a3a6b'},
+    {lbl:'Vencidos',        val:vencidos.length,  color:vencidos.length>0?'#8b1a1a':'#1a4731'},
+    {lbl:'Con seguimiento', val:acts.length,      color:'#1a4731'},
+  ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.lbl}</div><div class="kpi-value" style="color:${k.color}">${k.val}</div></div>`).join('');
+}
+function renderAgendaDia(acts, ref, todayStr) {
+  const d    = new Date(ref+'T12:00:00');
+  const dStr = d.toISOString().slice(0,10);
+  const DIAS =['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const esHoy = dStr===todayStr;
+  document.getElementById('ag-periodo').textContent = `${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]} ${d.getFullYear()}${esHoy?' — HOY':''}`;
+  const items = acts.filter(a=>String(a.prox).slice(0,10)===dStr);
+  document.getElementById('ag-contenido').innerHTML = `<div class="ag-day-block">
+    <div class="ag-day-header">
+      <div><div class="ag-day-label ${esHoy?'hoy':''}">${esHoy?'HOY · ':''}${DIAS[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}</div>
+      <div class="ag-day-sub">${items.length} seguimiento${items.length!==1?'s':''} programado${items.length!==1?'s':''}</div></div>
+      <span class="ag-day-count ${items.length?'urgente':''}">${items.length}</span>
+    </div>
+    ${items.length?items.map(a=>agItemHTML(a,todayStr)).join(''):'<div class="ag-empty">Sin seguimientos para este día.</div>'}
+  </div>`;
+}
+function renderAgendaSemana(acts, ref, todayStr) {
+  const d   = new Date(ref+'T12:00:00');
+  const dow = d.getDay();
+  const lunes = new Date(d); lunes.setDate(d.getDate()+(dow===0?-6:1-dow));
+  const domingo = new Date(lunes); domingo.setDate(lunes.getDate()+6);
+  const DIAS =['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  document.getElementById('ag-periodo').textContent = `Semana del ${lunes.getDate()} de ${MESES[lunes.getMonth()]} al ${domingo.getDate()} de ${MESES[domingo.getMonth()]} ${domingo.getFullYear()}`;
+  let cols='';
+  for(let i=0;i<7;i++){
+    const dia=new Date(lunes); dia.setDate(lunes.getDate()+i);
+    const dStr=dia.toISOString().slice(0,10);
+    const esHoy=dStr===todayStr;
+    const items=acts.filter(a=>String(a.prox).slice(0,10)===dStr);
+    const cerrados=['Cerrado - Ganado','Cerrado - Perdido'];
+    cols+=`<div class="ag-semana-col ${esHoy?'hoy':''}">
+      <div class="ag-semana-col-header">
+        <div class="ag-semana-col-label">${DIAS[i]}</div>
+        <div class="ag-semana-col-num ${esHoy?'hoy':''}">${dia.getDate()}</div>
+        ${items.length?`<div style="font-size:10px;color:${items.some(a=>!cerrados.includes(a.res)&&a.prox<todayStr)?'var(--red)':'var(--mid)'}">● ${items.length}</div>`:''}
+      </div>
+      ${items.length?items.map(a=>`<div class="ag-semana-item" title="${a.obs||''}">
+        <div style="font-weight:600;font-size:11px;margin-bottom:2px">${a.cliente}</div>
+        <div style="font-size:10px;color:var(--ink3)">${a.tipo||''} · ${a.vend||''}</div>
+        <div style="margin-top:3px">${resBadge(a.res)}</div>
+      </div>`).join(''):'<div class="ag-semana-empty">—</div>'}
+    </div>`;
+  }
+  document.getElementById('ag-contenido').innerHTML = `<div class="ag-semana-grid">${cols}</div>`;
+}
+function renderAgendaMes(acts, ref, todayStr) {
+  const d=new Date(ref+'T12:00:00');
+  const year=d.getFullYear(); const month=d.getMonth();
+  const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const cerrados=['Cerrado - Ganado','Cerrado - Perdido'];
+  document.getElementById('ag-periodo').textContent = `${MESES[month]} ${year}`;
+  const primerDia=new Date(year,month,1); const ultimoDia=new Date(year,month+1,0);
+  let startDow=primerDia.getDay(); startDow=startDow===0?6:startDow-1;
+  const diasMesAnt=new Date(year,month,0).getDate();
+  let html='<div class="ag-mes-grid">';
+  ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(d=>{ html+=`<div class="ag-mes-header">${d}</div>`; });
+  for(let i=startDow-1;i>=0;i--){ html+=`<div class="ag-mes-cell otro-mes"><div class="ag-mes-num">${diasMesAnt-i}</div></div>`; }
+  for(let dia=1;dia<=ultimoDia.getDate();dia++){
+    const dStr=`${year}-${String(month+1).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+    const esHoy=dStr===todayStr;
+    const items=acts.filter(a=>String(a.prox).slice(0,10)===dStr);
+    const tieneVencido=items.some(a=>!cerrados.includes(a.res)&&dStr<todayStr);
+    html+=`<div class="ag-mes-cell ${esHoy?'hoy':''}" onclick="agIrDia('${dStr}')">
+      <div class="ag-mes-num ${esHoy?'hoy':''}">${dia}</div>
+      ${items.slice(0,3).map(a=>`<div class="ag-mes-dot ${tieneVencido&&a.prox<todayStr?'urgente':''}">${a.cliente.slice(0,14)}</div>`).join('')}
+      ${items.length>3?`<div class="ag-mes-dot">+${items.length-3} más</div>`:''}
+    </div>`;
+  }
+  const resto=(startDow+ultimoDia.getDate())%7;
+  if(resto!==0){ for(let i=1;i<=7-resto;i++){ html+=`<div class="ag-mes-cell otro-mes"><div class="ag-mes-num">${i}</div></div>`; } }
+  html+='</div>';
+  const itemsMes=acts.filter(a=>String(a.prox).slice(0,7)===`${year}-${String(month+1).padStart(2,'0')}`).sort((a,b)=>a.prox.localeCompare(b.prox));
+  if(itemsMes.length){ html+=`<div class="card" style="margin-top:20px"><div class="card-header"><span class="card-title">Todos los seguimientos de ${MESES[month]} (${itemsMes.length})</span></div><div style="padding:0">${itemsMes.map(a=>agItemHTML(a,todayStr)).join('')}</div></div>`; }
+  document.getElementById('ag-contenido').innerHTML = html;
+}
+function agIrDia(dStr) {
+  document.getElementById('ag-vista').value='dia';
+  document.getElementById('ag-fecha').value=dStr;
+  renderAgenda();
+}
+function agItemHTML(a, todayStr) {
+  const cerrados=['Cerrado - Ganado','Cerrado - Perdido'];
+  const vencido=a.prox<todayStr&&!cerrados.includes(a.res);
+  const tiposIcono={Llamado:'📞',Visita:'🤝',Email:'✉️',WhatsApp:'💬','Reunión':'👥','Zoom/Teams':'💻',Otro:'📌'};
+  const icono=tiposIcono[a.tipo]||'📌';
+  return `<div class="ag-item">
+    <div class="ag-item-icon" style="background:${vencido?'#fde6e6':'var(--light)'}">${icono}</div>
+    <div class="ag-item-body">
+      <div class="ag-item-cli">${a.cliente}${vencido?' <span style="color:var(--red);font-size:10px">⚠ VENCIDO</span>':''}</div>
+      <div class="ag-item-meta">
+        ${tipoBadge(a.tipo)} ${resBadge(a.res)}
+        ${a.cotiz?`<span style="font-family:'DM Mono',monospace;font-size:11px">Cotiz. ${a.cotiz}</span>`:''}
+        <span>Ult. contacto: ${fmtDate(a.fecha)}</span>
+      </div>
+      ${a.obs?`<div class="ag-item-obs">${a.obs.slice(0,120)}${a.obs.length>120?'…':''}</div>`:''}
+    </div>
+    <div class="ag-item-vend">${a.vend||''}</div>
+  </div>`;
 }
 
 /* ══════════════════════════════════════════════════════
